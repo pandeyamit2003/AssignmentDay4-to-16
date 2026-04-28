@@ -1,0 +1,67 @@
+Objective: Develop a basic .NET class library and write unit tests using a testing framework
+
+
+
+
+1. Calculator.cs (The Logic)
+
+
+      using System;
+      namespace CalculatorLib
+      {
+      public class Calculator
+      {
+      public double Add(double a, double b) => a + b;
+      public double Subtract(double a, double b) => a - b;
+      public double Multiply(double a, double b) => a * b;
+
+      public double Divide(double a, double b)
+      {
+      if (b == 0)
+      {
+      throw new DivideByZeroException("Cannot divide by zero.");
+      }
+      return a / b;
+      }
+      }
+      }
+
+
+
+2. CalculatorTests.cs (The Testing)
+
+
+      using NUnit.Framework;
+      using CalculatorLib;
+      using System;
+      namespace CalculatorTests
+      {
+      [TestFixture]
+      public class CalculatorTests
+      {
+      private Calculator _calc;
+      [SetUp]
+      public void Setup()
+      {
+      _calc = new Calculator();
+      }
+      [Test]
+      [TestCase(10, 5, 15)]
+      [TestCase(10, 0, 10)]
+      public void Add_ValidInput_ReturnsSum(double a, double b, double expected)
+      {
+      Assert.That(_calc.Add(a, b), Is.EqualTo(expected));
+      }
+      [Test]
+      [TestCase(10, 2, 5)]
+      public void Divide_ValidInput_ReturnsQuotient(double a, double b, double expected)
+      {
+      Assert.That(_calc.Divide(a, b), Is.EqualTo(expected));
+      }
+      [Test]
+      public void Divide_ByZero_ThrowsException()
+      {
+      Assert.That(() => _calc.Divide(10, 0), Throws.TypeOf<DivideByZeroException>());
+      }
+      }
+      }
