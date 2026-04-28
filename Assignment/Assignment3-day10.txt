@@ -1,0 +1,179 @@
+Assignment 1: 
+
+Objective: Develop a basic .NET Core application that uses middleware to handle HTTP requests and serves static files. This assignment will help you understand the core features of .NET Core, middleware configuration, and serving static content.
+
+
+Program.cs
+
+
+  var builder = WebApplication.CreateBuilder(args);
+  var app = builder.Build();
+  
+  // 1. Logger Middleware 
+  app.Use(async (context, next) =>
+  {
+  // Log the incoming request
+  Console.WriteLine($"[Request] {context.Request.Method} {context.Request.Path}");
+  // Move to the next middleware in the pipeline
+  await next();
+  // Log the outgoing response
+  Console.WriteLine($"[Response] Status Code: {context.Response.StatusCode}");
+  });
+  
+  // 2. Security Middleware 
+  app.UseHttpsRedirection();
+  app.Use(async (context, next) =>
+  {
+  // Fix for ASP0019: Use the indexer [] or .Append instead of .Add
+  context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self';";
+  await next();
+  });
+
+  // 3. Static File Middleware
+  // UseDefaultFiles allows the server to look for index.html automatically
+  app.UseDefaultFiles(); 
+  app.UseStaticFiles();
+
+  // Final endpoint to handle cases where no static file is found
+  app.MapGet("/", () => "The Middleware App is running! If you don't see your HTML, check your wwwroot folder.");
+  app.Run();
+
+
+
+2. index.html
+
+
+   <!DOCTYPE html>
+   <html>
+   <head><title>Wipro Assignment</title></head>
+   <body>
+    <h1>Middleware App is Running!</h1>
+    <p>Check the console for request logs.</p>
+   </body>
+   </html>
+
+
+
+
+
+
+Assignment 2:
+
+
+Objective: Create a Razor Pages application to demonstrate understanding of Razor Pages architecture, syntax, and PageModel class. This assignment will involve creating and configuring Razor Pages and utilizing Razor syntax for server-side code.
+
+
+
+
+1.Product.cs
+
+   namespace InventoryApp.Models
+   {
+   public class Product
+   {
+   public int Id { get; set; }
+   public string Name { get; set; } = string.Empty;
+   public decimal Price { get; set; }
+   }
+   }
+
+
+2.AddProduct.cshtml.cs
+
+  using Microsoft.AspNetCore.Mvc.RazorPages;
+  using InventoryApp.Models; 
+  using Microsoft.AspNetCore.Mvc;
+
+  public class IndexModel : PageModel
+  {
+  public List<Product> ProductList { get; set; } = new List<Product>();
+  public void OnGet()
+  {
+  ProductList = new List<Product>
+  {
+  new Product { Id = 101, Name = "Laptop", Price = 1200 },
+  new Product { Id = 102, Name = "Mouse", Price = 25 }
+  };
+  }
+  }
+
+
+3.AddProduct.cshtml
+
+   page
+   del IndexModel
+
+<h1>Inventory List</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+      @foreach (var product in Model.ProductList)
+        {
+            <tr>
+                <td>@product.Id</td>
+                <td>@product.Name</td>
+                <td>@product.Price.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a asp-page="/AddProduct" class="btn btn-success">Add New Product</a>
+
+
+4.Index.cshtml.cs
+
+   
+   using Microsoft.AspNetCore.Mvc.RazorPages;
+   using InventoryApp.Models; // Add this line at the top
+   using Microsoft.AspNetCore.Mvc;
+   public class IndexModel : PageModel
+   {
+   public List<Product> ProductList { get; set; } = new List<Product>();
+   public void OnGet()
+   {
+   // Simulate dynamic data
+   ProductList = new List<Product>
+   {
+   new Product { Id = 101, Name = "Laptop", Price = 1200 },
+   new Product { Id = 102, Name = "Mouse", Price = 25 }
+   };
+   }
+   }
+
+
+5.Index.cshtml
+
+
+   @page
+@model IndexModel
+<h1>Inventory List</h1>
+<table class="table table-striped">
+<thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+         <th>Price</th>
+    </tr>
+</thead>
+<tbody>
+      @foreach (var product in Model.ProductList)
+        {
+            <tr>
+                <td>@product.Id</td>
+                <td>@product.Name</td>
+                <td>@product.Price.ToString("C")</td>
+            </tr>
+        }
+</tbody>
+</table>
+<a asp-page="/AddProduct" class="btn btn-success">Add New Product</a>
+
+
+
+

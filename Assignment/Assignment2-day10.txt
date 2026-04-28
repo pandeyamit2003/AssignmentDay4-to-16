@@ -1,0 +1,87 @@
+Objective: Implement a basic library management system that includes functionality for adding,
+viewing, and managing books and borrowers. Write unit tests to ensure the system works
+correctly.
+
+
+LibraryModels.cs
+
+
+     using System;
+     using System.Collections.Generic;
+     using System.Linq;
+     namespace LibraryLib;
+     
+     public class Book 
+     {
+     public string Title { get; set; } = string.Empty;
+     public string Author { get; set; } = string.Empty;
+     public string ISBN { get; set; } = string.Empty;
+     public bool IsBorrowed { get; set; } = false;
+     public void Borrow() => IsBorrowed = true;
+     public void Return() => IsBorrowed = false;
+     }
+     public class Borrower 
+     {
+     public string Name { get; set; } = string.Empty;
+     public string LibraryCardNumber { get; set; } = string.Empty;
+     public List<Book> BorrowedBooks { get; set; } = new();
+     public void BorrowBook(Book book) => BorrowedBooks.Add(book);
+     public void ReturnBook(Book book) => BorrowedBooks.Remove(book);
+     }
+     //THIS IS THE UPDATED LIBRARY CLASS
+     public class Library 
+     {
+     public List<Book> Books { get; set; } = new();
+     public List<Borrower> Borrowers { get; set; } = new();
+     public void AddBook(Book b) => Books.Add(b);
+     public void RegisterBorrower(Borrower b) => Borrowers.Add(b);
+     public void BorrowBook(string isbn, string cardNum) 
+     {
+     var book = Books.FirstOrDefault(b => b.ISBN == isbn && !b.IsBorrowed);
+     var borrower = Borrowers.FirstOrDefault(b => b.LibraryCardNumber == cardNum);
+     // This check fixes the "possibly null reference" error
+     if (book != null && borrower != null) 
+     {
+     book.Borrow();
+     borrower.BorrowBook(book);
+     }
+     }
+     public void ReturnBook(string isbn, string cardNum) 
+     {
+     var borrower = Borrowers.FirstOrDefault(b => b.LibraryCardNumber == cardNum);
+     var book = borrower?.BorrowedBooks.FirstOrDefault(b => b.ISBN == isbn);
+     if (book != null && borrower != null) 
+     {
+     book.Return();
+     borrower.ReturnBook(book);
+     }
+     }
+     }
+
+
+2. UnitTest1.cs
+
+
+     using NUnit.Framework;
+     using LibraryLib;
+     namespace LibraryTests;
+
+     public class LibraryTests {
+     private Library _lib;
+     [SetUp]
+     public void Setup() => _lib = new Library();
+     [Test]
+     public void Test_AddBook() {
+     _lib.AddBook(new Book { Title = "C# Guide", ISBN = "101" });
+     Assert.That(_lib.Books.Count, Is.EqualTo(1));
+     }
+     [Test]
+     public void Test_BorrowProcess() {
+     var book = new Book { Title = "C# Guide", ISBN = "101" };
+     var user = new Borrower { Name = "Ali", LibraryCardNumber = "A1" };
+     _lib.AddBook(book);
+     _lib.RegisterBorrower(user);_lib.BorrowBook("101", "A1");
+     Assert.That(book.IsBorrowed, Is.True);
+     Assert.That(user.BorrowedBooks.Count, Is.EqualTo(1));
+     }
+     }
